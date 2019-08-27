@@ -18,7 +18,6 @@ proc FPDef {} {
     set ifp(allrows) 1
     set ifp(allcols) 0
     set ifp(show) 1
-    set ifp(edit) 0
     set ifp(panto) 1
 
     set ifp(minrows) 20
@@ -48,16 +47,13 @@ proc FPDef {} {
 
     # prefs only
     set pfp(server) cds
-    set pfp(loc) 500
     set pfp(sym,color) green
     set pfp(sym,width) 1
     set pfp(sym,dash) 0
-    set pfp(sym,units) physical
     set pfp(sym,font) helvetica
     set pfp(sym,font,size) 10
     set pfp(sym,font,weight) normal
     set pfp(sym,font,slant) roman
-    set pfp(vot) 1
 }
 
 # Load via HTTP
@@ -1091,11 +1087,6 @@ proc PrefsDialogFootprint {} {
     # Footprint
     set f [ttk::labelframe $w.cat.param -text [msgcat::mc {Footprint}]]
 
-    ttk::checkbutton $f.vot -variable pfp(vot) \
-	-text [msgcat::mc {Download VOTABLE format if available}]
-    ttk::label $f.loctitle -text [msgcat::mc {IAU Location Code}]
-    ttk::entry $f.loc -textvariable pfp(loc) -width 7
-
     global pfp
     ttk::label $f.ctitle -text [msgcat::mc {Color}]
     ColorMenuButton $f.color pfp sym,color {}
@@ -1110,8 +1101,6 @@ proc PrefsDialogFootprint {} {
     grid $f.ctitle $f.color -padx 2 -pady 2 -sticky w
     grid $f.cwidth $f.width -padx 2 -pady 2 -sticky w
     grid $f.ftitle $f.font -padx 2 -pady 2 -sticky w
-    grid $f.loctitle - - $f.loc -padx 2 -pady 2 -sticky w
-    grid $f.vot - - - -padx 2 -pady 2 -sticky w
 
     pack $f -side top -fill both -expand true
 }
@@ -1347,8 +1336,6 @@ proc FootprintCmdSymbolAdd {} {
     starbase_set $cvar(symdb) $row \
 	[starbase_colnum $cvar(symdb) fontslant] \
 	$pfp(sym,font,slant)
-    starbase_set $cvar(symdb) $row \
-	[starbase_colnum $cvar(symdb) units] $pfp(sym,units)
     FPGenerate $cvarname
 }
 

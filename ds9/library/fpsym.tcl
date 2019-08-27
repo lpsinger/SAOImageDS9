@@ -58,14 +58,6 @@ proc FPSymDialog {parent} {
 			    [starbase_colnum $var(symdb) fontslant]]
 	set var(text) [starbase_get $var(symdb) $var(row) \
 			   [starbase_colnum $var(symdb) text]]
-	set var(size) [starbase_get $var(symdb) $var(row) \
-			   [starbase_colnum $var(symdb) size]]
-	set var(size2) [starbase_get $var(symdb) $var(row) \
-			    [starbase_colnum $var(symdb) size2]]
-	set var(units) [starbase_get $var(symdb) $var(row) \
-			    [starbase_colnum $var(symdb) units]]
-	set var(angle) [starbase_get $var(symdb) $var(row) \
-			    [starbase_colnum $var(symdb) angle]]
     }
 
 
@@ -121,22 +113,6 @@ proc FPSymDialog {parent} {
     ttk::entry $f.text -textvariable ${varname}(text) -width 40
     ttk::button $f.btext -text [msgcat::mc {Edit}] \
 	-command "FPEditDialog $varname text  $pvar(catdb)"
-    ttk::label $f.tsize -text [msgcat::mc {Size/Radius}] 
-    ttk::entry $f.size -textvariable ${varname}(size) -width 40
-    ttk::button $f.bsize -text [msgcat::mc {Edit}] \
-	-command "FPEditDialog $varname size $pvar(catdb)"
-    ttk::label $f.tsize2 -text "[msgcat::mc {Size/Radius}] 2" 
-    ttk::entry $f.size2 -textvariable ${varname}(size2) -width 40
-    ttk::button $f.bsize2 -text [msgcat::mc {Edit}] \
-	-command "FPEditDialog $varname size2 $pvar(catdb)"
-    ttk::label $f.tunits -text [msgcat::mc {Units}] 
-    tk_optionMenu $f.units ${varname}(units) \
-	image physical degrees arcmin arcsec
-    $f.units.menu configure
-    ttk::label $f.tangle -text [msgcat::mc {Angle}] 
-    ttk::entry $f.angle -textvariable ${varname}(angle) -width 40
-    ttk::button $f.bangle -text [msgcat::mc {Edit}] \
-	-command "FPEditDialog $varname angle $pvar(catdb)"
 
     grid $f.tcondition $f.condition $f.bcondition -padx 2 -pady 2 -sticky w
     grid $f.tthen -padx 2 -pady 2 -sticky w
@@ -144,10 +120,6 @@ proc FPSymDialog {parent} {
     grid $f.twidth $f.width -padx 2 -pady 2 -sticky w
     grid $f.tfont $f.font -padx 2 -pady 2 -sticky w
     grid $f.ttext $f.text $f.btext -padx 2 -pady 2 -sticky w
-    grid $f.tsize $f.size $f.bsize -padx 2 -pady 2 -sticky w
-    grid $f.tsize2 $f.size2 $f.bsize2 -padx 2 -pady 2 -sticky w
-    grid $f.tunits $f.units -padx 2 -pady 2 -sticky w
-    grid $f.tangle $f.angle $f.bangle -padx 2 -pady 2 -sticky w
 
     # Table
     set f [ttk::frame $w.tbl]
@@ -242,14 +214,6 @@ proc FPSymApply {varname} {
 		[starbase_colnum $var(symdb) fontslant] $var(font,slant)
 	    starbase_set $var(symdb) $var(row) \
 		[starbase_colnum $var(symdb) text] $var(text)
-	    starbase_set $var(symdb) $var(row) \
-		[starbase_colnum $var(symdb) size] $var(size)
-	    starbase_set $var(symdb) $var(row) \
-		[starbase_colnum $var(symdb) size2] $var(size2)
-	    starbase_set $var(symdb) $var(row) \
-		[starbase_colnum $var(symdb) units] $var(units)
-	    starbase_set $var(symdb) $var(row) \
-		[starbase_colnum $var(symdb) angle] $var(angle)
 	}
     }
 
@@ -272,10 +236,6 @@ proc FPSymAdd {varname} {
     set var(font,weight) {}
     set var(font,slant) {}
     set var(text) {}
-    set var(size) {}
-    set var(size2) {}
-    set var(units) {}
-    set var(angle) {}
 }
 
 # Support
@@ -291,7 +251,7 @@ proc FPSymDBInit {varname} {
     }
 
     starbase_new $var(symdb) condition color width dash \
-	font fontsize fontweight fontslant text size size2 units angle
+	font fontsize fontweight fontslant text
     starbase_rowins $var(symdb) 1
     starbase_set $var(symdb) 1 \
 	[starbase_colnum $var(symdb) color] $pfp(sym,color)
@@ -307,8 +267,6 @@ proc FPSymDBInit {varname} {
 	[starbase_colnum $var(symdb) fontweight] $pfp(sym,font,weight)
     starbase_set $var(symdb) 1 \
 	[starbase_colnum $var(symdb) fontslant] $pfp(sym,font,slant)
-    starbase_set $var(symdb) 1 \
-	[starbase_colnum $var(symdb) units] $pfp(sym,units)
 }
 
 proc FPSymUpdate {varname} {
@@ -367,14 +325,6 @@ proc FPSymSelectCB {varname} {
 				[starbase_colnum $var(symdb) fontslant]]
 	    set var(text) [starbase_get $var(symdb) $var(row) \
 			       [starbase_colnum $var(symdb) text]]
-	    set var(size) [starbase_get $var(symdb) $var(row) \
-			       [starbase_colnum $var(symdb) size]]
-	    set var(size2) [starbase_get $var(symdb) $var(row) \
-				[starbase_colnum $var(symdb) size2]]
-	    set var(units) [starbase_get $var(symdb) $var(row) \
-				[starbase_colnum $var(symdb) units]]
-	    set var(angle) [starbase_get $var(symdb) $var(row) \
-				[starbase_colnum $var(symdb) angle]]
 	    return
 	}
     }

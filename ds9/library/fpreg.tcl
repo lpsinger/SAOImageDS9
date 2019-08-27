@@ -27,8 +27,6 @@ proc FPReg {varname row interactive resultname} {
     # fontweight: constant
     # fontslant: constant
     # text: subst
-    # units: constant
-    # angle: expr
 
     # valid cols?
     if {$var(colx) == {} || $var(coly) == {}} {
@@ -82,8 +80,6 @@ proc FPReg {varname row interactive resultname} {
     set snfontweight [starbase_colnum $var(symdb) fontweight]
     set snfontslant [starbase_colnum $var(symdb) fontslant]
     set sntext [starbase_colnum $var(symdb) text]
-    set snunits [starbase_colnum $var(symdb) units]
-    set snangle [starbase_colnum $var(symdb) angle]
 
     # for each row in the catalog table ...
     if {[string is integer -strict $row]} {
@@ -99,8 +95,7 @@ proc FPReg {varname row interactive resultname} {
     for {set jj 1} {$jj <= $snrows} {incr jj} {
 	set cond [starbase_get $var(symdb) $jj $sncond]
 	set text [starbase_get $var(symdb) $jj $sntext]
-	set angle [starbase_get $var(symdb) $jj $snangle]
-	if {$cond!={} || $text!={} || $sz!={} || $sz2!={} || $angle!={}} {
+	if {$cond!={} || $text!={}} {
 	    set doEval 1
 	}
     }
@@ -147,13 +142,6 @@ proc FPReg {varname row interactive resultname} {
 		continue
 	    }
 
-	    # shape
-	    set shape point
-	    set size {}
-	    set szcol {}
-	    set sz2col {}
-	    set angcol {}
-
 	    # xx
 	    set xx [starbase_get $var(tbldb) $ii $colx]
 	    switch $xformat {
@@ -165,16 +153,6 @@ proc FPReg {varname row interactive resultname} {
 	    set yy [starbase_get $var(tbldb) $ii $coly]
 	    if {$yformat == {d:m:s}} {
 		set yy [uformat $yformat d $yy]
-	    }
-
-	    set units [starbase_get $var(symdb) $jj $snunits]
-	    switch -- $units {
-		image {set unitval i}
-		physical {set unitval p}
-		degrees {set unitval d}
-		arcmin {set unitval {'}}
-		arcsec {set unitval {"}}
-		default {set unitval p}
 	    }
 
 	    # color
@@ -227,13 +205,9 @@ proc FPReg {varname row interactive resultname} {
 	    # final substitution and append result
 	    # init result for substitutions
 	    if {$interactive} {
-		if {$var(edit)} {
-		    set template "\${sys};\${shape}(\${xx} \${yy} \${size}) # color=\${color} width=\${width} dash=\${dash} font=\{${font} ${fontsize} ${fontweight} ${fontslant}\} text=\{\${text}\} tag={${varname}} tag={${varname}.\${ii}} select=1 edit=1 move=1 rotate=1 delete=1 highlite=0 callback=select FPHighliteCB {${varname}.\${ii}} callback=unselect FPUnhighliteCB {${varname}.\${ii}} callback=edit FPEditCB {${varname}.\${ii}.\${szcol}.\${sz2col}.\${units}.\${angcol}} callback=move FPMoveCB {${varname}.\${ii}} callback=rotate FPRotateCB {${varname}.\${ii}.\${angcol}} callback=delete FPDeleteCB {${varname}.\${ii}}\n"
-		} else {
-		    set template "\${sys};\${shape}(\${xx} \${yy} \${size}) # color=\${color} width=\${width} dash=\${dash} font=\{${font} ${fontsize} ${fontweight} ${fontslant}\} text=\{\${text}\} tag={${varname}} tag={${varname}.\${ii}} select=0 edit=0 move=0 rotate=0 delete=1 highlite=1 callback=delete FPDeleteCB {${varname}.\${ii}} callback=highlite FPHighliteCB {${varname}.\${ii}} callback=unhighlite FPUnhighliteCB {${varname}.\${ii}}\n"
-		}
+	        set template "\${sys};point(\${xx} \${yy}) # color=\${color} width=\${width} dash=\${dash} font=\{${font} ${fontsize} ${fontweight} ${fontslant}\} text=\{\${text}\} tag={${varname}} tag={${varname}.\${ii}} select=0 edit=0 move=0 rotate=0 delete=1 highlite=1 callback=delete FPDeleteCB {${varname}.\${ii}} callback=highlite FPHighliteCB {${varname}.\${ii}} callback=unhighlite FPUnhighliteCB {${varname}.\${ii}}\n"
 	    } else {
-		set template "\${sys};\${shape}(\${xx} \${yy} \${size}) # color=\${color} width=\${width} dash=\${dash} text=\{\${text}\} tag=$varname\n"
+		set template "\${sys};point(\${xx} \${yy}) # color=\${color} width=\${width} dash=\${dash} text=\{\${text}\} tag=$varname\n"
 	    }
 	    append result [subst $template]
 

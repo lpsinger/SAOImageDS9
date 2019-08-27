@@ -59,11 +59,6 @@ proc FPDialog {varname format catalog title action} {
     set var(server) $pfp(server)
 
     # Skybot
-    set var(loc) $pfp(loc)
-    set var(asteroids) 1
-    set var(planets) 1
-    set var(comets) 1
-
     set var(system) $wcs(system)
     set var(sky) $wcs(sky)
     set var(skyformat) $wcs(skyformat)
@@ -73,7 +68,6 @@ proc FPDialog {varname format catalog title action} {
     set var(allrows) $ifp(allrows)
     set var(allcols) $ifp(allcols)
     set var(show) $ifp(show)
-    set var(edit) $ifp(edit)
     set var(panto) $ifp(panto)
 
     set var(psystem) $var(system)
@@ -128,8 +122,6 @@ proc FPDialog {varname format catalog title action} {
     $mb.file add separator
     $mb.file add checkbutton -label [msgcat::mc {Show}] \
 	-variable ${varname}(show) -command [list FPGenerate $varname]
-    $mb.file add checkbutton -label [msgcat::mc {Edit}] \
-	-variable ${varname}(edit) -command [list FPEdit $varname]
     $mb.file add separator
     $mb.file add cascade -label [msgcat::mc {SAMP}] -menu $mb.file.samp
     $mb.file add command -label [msgcat::mc {Plot}] \
@@ -250,14 +242,6 @@ proc FPDialog {varname format catalog title action} {
     grid $f.ttitle $f.title -padx 2 -pady 2 -sticky w
     grid $f.tcat $f.cat -padx 2 -pady 2 -sticky w
     grid $f.tref $f.ref -padx 2 -pady 2 -sticky w
-    switch $var(format) {
-	skybot {
-	    ttk::label $f.loctitle -text [msgcat::mc {IAU Location Code}]
-	    ttk::entry $f.loc -textvariable ${varname}(loc) -width 7
-	    grid $f.loctitle $f.loc -padx 2 -pady 2 -sticky w
-	}
-	default {}
-    }
 
     # Object
     set f [ttk::labelframe $w.obj -text [msgcat::mc {Object}] -padding 2]
@@ -286,19 +270,6 @@ proc FPDialog {varname format catalog title action} {
     grid $f.xtitle $f.x $f.ytitle $f.y $f.coord $f.update \
 	-padx 2 -pady 2 -sticky w
     grid $f.rtitle $f.r $f.rformat -padx 2 -pady 2 -sticky w
-
-    switch $var(format) {
-	skybot {
-	    ttk::checkbutton $f.asteroids -text [msgcat::mc {Asteroids}] \
-		-variable ${varname}(asteroids)
-	    ttk::checkbutton $f.planets -text [msgcat::mc {Planets}] \
-		-variable ${varname}(planets)
-	    ttk::checkbutton $f.comets -text [msgcat::mc {Comets}] \
-		-variable ${varname}(comets)
-	    grid x $f.asteroids $f.planets $f.comets -padx 2 -pady 2 -sticky w
-	}
-	default {}
-    }
 
     # Param
     set f [ttk::labelframe $w.param -text [msgcat::mc {Table}] -padding 2]
@@ -425,16 +396,6 @@ proc FPDialog {varname format catalog title action} {
     FPSortMenu $varname
     FPColsMenu $varname
     FPColsUpdate $varname
-    switch $var(format) {
-	cds {$mb entryconfig [msgcat::mc {Catalog Server}] -state normal}
-	cxc -
-	ned -
-	skybot -
-	sdss -
-	simbad {
-	    $mb entryconfig [msgcat::mc {Catalog Server}] -state disabled
-	}
-    }
 
     ARCoord $varname
     FPUpdate $varname
@@ -530,12 +491,8 @@ proc FPAck {varname} {
     global $varname
 
     switch $var(format) {
-	cds {FPCDSAck $varname}
 	cxc {FPCXCAck $varname}
-	ned {FPNEDAck $varname}
-	skybot {FPSkyBotAck $varname}
-	sdss {FPSDSSAck $varname}
-	simbad {FPSIMBADAck $varname}
+	hla {FPHLAAck $varname}
     }
 }
 
@@ -726,15 +683,9 @@ proc FPEdit {varname} {
 	FPPlotGenerate $varname
     }
 
-    if {$var(edit)} {
-	$var(tbl) configure \
-	    -state normal \
-	    -selectmode single
-    } else {
-	$var(tbl) configure \
-	    -state disabled \
-	    -selectmode extended
-    }
+    $var(tbl) configure \
+	-state disabled \
+	-selectmode extended
 }
 
 proc FPGetHeader {varname} {
@@ -909,12 +860,8 @@ proc FPServer {varname} {
 	ARStatus $varname "Searching [string range $var(title) 0 50]"
 
 	switch $var(format) {
-	    cds {FPCDS $varname}
 	    cxc {FPCXC $varname}
-	    ned {FPNED $varname}
-	    skybot {FPSkyBot $varname}
-	    sdss {FPSDSS $varname}
-	    simbad {FPSIMBAD $varname}
+	    hla {FPHLA $varname}
 	}
     } else {
 	ARError $varname [msgcat::mc {Please specify radius and either name or (ra,dec)}]
