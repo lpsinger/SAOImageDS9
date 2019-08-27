@@ -318,6 +318,8 @@ DebugDef
 ESODef
 ExamineDef
 ExportDef
+FPDef
+FPSymDef
 GraphDef
 GridDef
 GroupDef

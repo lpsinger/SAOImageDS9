@@ -9,7 +9,7 @@ proc TSVRead {t fn} {
     global $t
 
     global debug
-    if {$debug(tcl,cat) || $debug(tcl,sia)} {
+    if {$debug(tcl,cat) || $debug(tcl,sia) || $debug(tcl,footprint)} {
 	puts stderr "TSVRead"
     }
 
@@ -130,7 +130,7 @@ proc TSVWrite {t fn} {
     global $t
 
     global debug
-    if {$debug(tcl,cat) || $debug(tcl,sia)} {
+    if {$debug(tcl,cat) || $debug(tcl,sia) || $debug(tcl,footprint)} {
 	puts stderr "TSVWrite"
     }
 
