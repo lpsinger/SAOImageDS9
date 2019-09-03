@@ -153,8 +153,7 @@ proc AnalysisMainMenu {} {
     CATAnalysisMenu
 
     menu $ds9(mb).analysis.footprint
-    $ds9(mb).analysis.footprint add command \
-	-label {Chandra (NASA/CXC)} -command FPTool
+    FPAnalysisMenu $ds9(mb).analysis.footprint
 
     menu $ds9(mb).analysis.plot
     $ds9(mb).analysis.plot add command -label [msgcat::mc {Line}] \

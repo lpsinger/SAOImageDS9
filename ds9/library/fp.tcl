@@ -35,8 +35,15 @@ proc FPDef {} {
     set ifp(unique) 1
 
     set ifp(def) { \
-		       {{} \
+		       {{Chandra (NASA/CXC)} \
 			    fpcxc \
+			    {https://cxcfps.cfa.harvard.edu/cgi-bin/cda/footprint/get_vo_table.pl} \
+			    {inst=ACIS-S,ACIS-I,HRC-S,HRC-I} \
+			    get \
+			} \
+		       {{Hubble Legacy Archive (STSCI)} \
+			    fphla \
+			    {http://hla.stsci.edu/cgi-bin/hlaSIAP.cgi} \
 			    {} \
 			    get \
 			} \
@@ -671,27 +678,19 @@ proc FPValidDB {varname} {
     }
 }
 
-proc FPAnalysisMenu {} {
+proc FPAnalysisMenu {mb} {
     global ifp
     global ds9
 
-    set mm "$ds9(mb).analysis.cat"
-    set nn {}
-
     foreach ff $ifp(def) {
-	set ll [lindex $ff 0]
-	set ww [lindex $ff 1]
-	set ss [lindex $ff 2]
-	set cc [lindex $ff 3]
+	set title [lindex $ff 0]
+	set vars [lindex $ff 1]
+	set url [lindex $ff 2]
+	set opts [lindex $ff 3]
+	set method [lindex $ff 4]
 
-	if {$ll != {-}} {
-	    $mm.$nn add command -label $ll \
-		-command [list FPDialog $ww $ss $cc $ll apply]
-	} else {
-	    set nn "$ss"
-	    menu $mm.$nn
-	    $mm add cascade -label $ww -menu $mm.$nn
-	}
+	$mb add command -label $title \
+	    -command [list FPDialog $vars $title $url $opts $method apply]
     }
 }
 

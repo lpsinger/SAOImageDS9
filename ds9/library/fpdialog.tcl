@@ -5,7 +5,8 @@
 package provide DS9 1.0
 
 # used by backup
-proc FPDialog {varname format catalog title action} {
+proc FPDialog {varname title url opts method action} {
+#varname format catalog title action
     global cat
     global ifp
     global pfp
@@ -14,6 +15,8 @@ proc FPDialog {varname format catalog title action} {
     global pds9
     global wcs
    
+    return
+    
     # first determine if aready in use, then increment
     if {[lsearch $ifp(cats) $varname] >= 0} {
 	incr fp(id)
@@ -25,7 +28,7 @@ proc FPDialog {varname format catalog title action} {
 
     global debug
     if {$debug(tcl,footprint)} {
-	puts stderr "FPDialog $varname:$format:$catalog:$title:$action"
+	puts stderr "FPDialog $varname:$title:$url:$opts:$action:$method"
     }
 
     # main dialog
