@@ -111,56 +111,6 @@ proc FPGetURL {varname} {
     }
 }
 
-proc FPGetURLIncr {varname} {
-    upvar #0 $varname var
-    global $varname
-
-    global debug
-    if {$debug(tcl,footprint)} {
-	puts stderr "FPGetURLIncr $varname $var(url)?$var(query)"
-    }
-
-    ARStatus $varname [msgcat::mc {Loading}]
-
-    global ihttp
-    if {$var(sync)} {
-	if {![catch {set var(token) [http::geturl $var(url) \
-					 -query $var(query) \
-					 -timeout $ihttp(timeout) \
-					 -handler \
-					 [list $var(proc,reader) $var(catdb)] \
-					 -headers "[ProxyHTTP]"]
-	}]} {
-	    # reset errorInfo (may be set in http::geturl)
-	    global errorInfo
-	    set errorInfo {}
-
-	    set var(active) 1
-	    FPGetURLFinish $varname $var(token)
-	} else {
-	    ARError $varname "[msgcat::mc {Unable to locate URL}] $var(url)"
-	}
-    } else {
-	if {![catch {set var(token) [http::geturl $var(url) \
-					 -query $var(query) \
-					 -timeout $ihttp(timeout) \
-					 -handler \
-					 [list $var(proc,reader) $var(catdb)] \
-					 -command \
-					 [list FPGetURLFinish $varname] \
-					 -headers "[ProxyHTTP]"]
-	}]} {
-	    # reset errorInfo (may be set in http::geturl)
-	    global errorInfo
-	    set errorInfo {}
-
-	    set var(active) 1
-	} else {
-	    ARError $varname "[msgcat::mc {Unable to locate URL}] $var(url)"
-	}
-    }
-}
-
 proc FPGetURLFinish {varname token} {
     upvar #0 $varname var
     global $varname
@@ -246,27 +196,6 @@ proc FPLoad {varname} {
     set var(proc,done) FPLoadDone
     set var(proc,load) FPLoad
     FPGetURL $varname
-    return
-}
-
-proc FPLoadIncr {varname} {
-    upvar #0 $varname var
-    global $varname
-
-    # clear previous db
-    global $var(catdb)
-    if {[info exists $var(catdb)]} {
-	unset $var(catdb)
-    }
-
-    global debug
-    if {$debug(tcl,footprint)} {
-	puts stderr "FPLoadIncr $varname $var(url)?$var(query)"
-    }
-
-    set var(proc,done) FPLoadDone
-    set var(proc,load) FPLoadIncr
-    FPGetURLIncr $varname
     return
 }
 
