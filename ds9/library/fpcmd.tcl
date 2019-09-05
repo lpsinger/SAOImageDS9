@@ -6,12 +6,24 @@ package provide DS9 1.0
 
 # Table Commands
 
+proc FPStatusRows {varname rowlist} {
+    upvar #0 $varname var
+    global $varname
+
+    # rowlist start at 1
+    if {[llength $rowlist]>0} {
+	ARStatus $varname "[msgcat::mc {Row}] [join $rowlist {,}]"
+    } else {
+	ARStatus $varname {}
+    }
+}
+
 proc FPSelectCmd {varname ss rc} {
     upvar #0 $varname var
     global $varname
 
     global debug
-    if {$debug(tcl,footprint)} {
+    if {$debug(tcl,fp)} {
 	puts stderr "FPSelectCmd $varname $ss $rc"
     }
 
@@ -24,7 +36,7 @@ proc FPSelectBrowseCmd {varname ss rc} {
 
     # starts at 1
     global debug
-    if {$debug(tcl,footprint)} {
+    if {$debug(tcl,fp)} {
 	puts stderr "FPSelectBrowseCmd $varname ss=$ss rc=$rc"
     }
 
@@ -52,7 +64,7 @@ proc FPSelectBrowseCmd {varname ss rc} {
     set last [lindex [split $ss ,] 0]
     set row [lindex [split $rc ,] 0]
 
-    # needed for plot, status, samp
+    # needed for status
     # starts at 0
     set rowlist {}
     foreach sel [$var(tbl) curselection] {
@@ -81,14 +93,6 @@ proc FPSelectBrowseCmd {varname ss rc} {
     # status
     FPStatusRows $varname $rowlist
 
-    # plot
-    if {$var(plot)} {
-	FPPlotHighliteElement $varname $rowlist
-    }
-
-    # samp
-    SAMPSendTableRowListCmd $varname $rowlist
-
     # panto
     FPPanTo $varname [lindex $var(blink,marker) 0]
 
@@ -113,7 +117,7 @@ proc FPSelectRows {varname src rowlist cc} {
 
     # rows start at 1
     global debug
-    if {$debug(tcl,footprint)} {
+    if {$debug(tcl,fp)} {
 	puts stderr "FPSelectRows $varname $src $rowlist $cc"
     }
 
@@ -159,18 +163,6 @@ proc FPSelectRows {varname src rowlist cc} {
 
     # status
     FPStatusRows $varname $rowlist
-
-    # source of call
-    switch $src {
-	samp {
-	    if {$var(plot)} {
-		FPPlotHighliteElement $varname $rowlist
-	    }
-	}
-	plot {
-	    SAMPSendTableRowListCmd $varname $rowlist
-	}
-    }
 
     # panto
     FPPanTo $varname [lindex $var(blink,marker) 0]
@@ -267,7 +259,7 @@ proc FPSelectTimer {varname} {
 #   call backs can't call other procs
 proc FPHighliteCB {tag id} {
     global debug
-    if {$debug(tcl,footprint)} {
+    if {$debug(tcl,fp)} {
 	puts stderr "FPHighliteCB $tag $id"
     }
 
@@ -292,7 +284,7 @@ proc FPHighliteCB {tag id} {
 
 proc FPUnhighliteCB {tag id} {
     global debug
-    if {$debug(tcl,footprint)} {
+    if {$debug(tcl,fp)} {
 	puts stderr "FPUnhighliteCB $tag $id"
     }
 
@@ -316,7 +308,7 @@ proc FPUnhighliteCB {tag id} {
 
 proc FPDeleteCB {tag id} {
     global debug
-    if {$debug(tcl,footprint)} {
+    if {$debug(tcl,fp)} {
 	puts stderr "FPDeleteCB $tag $id"
     }
 }
@@ -327,7 +319,7 @@ proc FPButton {which x y} {
     global imarker
 
     global debug
-    if {$debug(tcl,footprint)} {
+    if {$debug(tcl,fp)} {
 	puts stderr "FPButton $which $x $y"
     }
 
@@ -400,7 +392,7 @@ proc FPShift {which x y} {
     global imarker
 
     global debug
-    if {$debug(tcl,footprint)} {
+    if {$debug(tcl,fp)} {
 	puts stderr "FPShift $which $x $y"
     }
 
@@ -442,7 +434,7 @@ proc FPMotion {which x y} {
     global imarker
 
     global debug
-    if {$debug(tcl,footprint)} {
+    if {$debug(tcl,fp)} {
 	puts stderr "FPMotion $which $x $y"
     }
 
@@ -482,10 +474,9 @@ proc FPMotion {which x y} {
 
 proc FPRelease {which x y} {
     global imarker
-    global samp
 
     global debug
-    if {$debug(tcl,footprint)} {
+    if {$debug(tcl,fp)} {
 	puts stderr "FPRelease $which $x $y"
     }
 
@@ -515,7 +506,7 @@ proc FPRelease {which x y} {
     set imarker(motion) none
     set imarker(handle) -1
 
-    # plot, stats, samp
+    # stats
     set rr {}
     foreach mm [$which get marker catalog highlite] {
 	lappend rr [string trim [lindex [$which get marker catalog $mm tag] 1]]
@@ -537,16 +528,6 @@ proc FPRelease {which x y} {
 
 		    # status
 		    FPStatusRows $varname $rowlist
-		    # plot
-		    if {$var(plot)} {
-			FPPlotHighliteElement $varname $rowlist
-		    }
-		    # samp
-		    if {[info exists samp]} {
-			if {$samp(apps,votable) != {}} {
-			    SAMPSendTableRowListCmd $varname $rowlist
-			}
-		    }
 		}
 
 		# now a new list
@@ -562,16 +543,6 @@ proc FPRelease {which x y} {
 
 	    # status
 	    FPStatusRows $varname $rowlist
-	    #plot
-	    if {$var(plot)} {
-		FPPlotHighliteElement $varname $rowlist
-	    }
-	    # samp
-	    if {[info exists samp]} {
-		if {$samp(apps,votable) != {}} {
-		    SAMPSendTableRowListCmd $varname $rowlist
-		}
-	    }
 	}
     }
 }

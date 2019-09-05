@@ -9,17 +9,22 @@ proc SIADialog {varname title url opts method action} {
     global sia
     global isia
     global psia
+
     global ds9
-
     global wcs
-
-    upvar #0 $varname var
-    global $varname
+    global current
 
     global debug
     if {$debug(tcl,sia)} {
 	puts stderr "SIADialog $varname:$title:$url:$opts:$action:$method"
     }
+
+    if {$current(frame) == {}} {
+	return
+    }
+
+    upvar #0 $varname var
+    global $varname
 
     # main dialog
     set var(top) ".${varname}"
@@ -27,11 +32,6 @@ proc SIADialog {varname title url opts method action} {
 
     if {[winfo exists $var(top)]} {
 	raise $var(top)
-	return
-    }
-
-    global current
-    if {$current(frame) == {}} {
 	return
     }
 
@@ -337,7 +337,6 @@ proc SIADialogUpdate {varname} {
     global $varname
 
     global ds9
-    global samp
 
     global debug
     if {$debug(tcl,sia)} {

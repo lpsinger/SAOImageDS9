@@ -57,6 +57,8 @@ proc CommSet {fn paramlist {safemode 0}} {
 	export {ProcessExportCmd param i}
 	file {ProcessFileCmd param i {} {} {}}
 	fits {ProcessFitsCmd param i {} $fn}
+	footprint -
+	fp {ProcessFPCmd param i}
 	frame {ProcessFrameCmd param i}
 	gif {ProcessGIFCmd param i {} $fn}
 	grid {ProcessGridCmd param i}
@@ -255,6 +257,8 @@ proc CommGet {proc id paramlist fn} {
 	export {}
 	file {ProcessSendFileCmd $proc $id $param}
 	fits {ProcessSendFitsCmd $proc $id $param {} $fn}
+	footprint -
+	fp {ProcessSendFPCmd $proc $id $param {} $fn}
 	frame {ProcessSendFrameCmd $proc $id $param}
 	gif {ProcessSendGIFCmd $proc $id $param {} $fn}
 	grid {ProcessSendGridCmd $proc $id $param}

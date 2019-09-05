@@ -239,7 +239,6 @@ proc SIALoad {varname url query} {
     }
 
     SIAGetURL $varname $url $query
-    return
 }
 
 proc SIALoadDone {varname} {
@@ -283,7 +282,7 @@ proc SIATable {varname} {
 	puts stderr "SIATable $varname"
     }
 
-    if {![SIAValidDB $var(tbldb)]} {
+    if {![CATValidDB $var(tbldb)]} {
 	return
     }
 
@@ -316,20 +315,6 @@ proc SIATable {varname} {
     }
 }
 
-proc SIAValidDB {varname} {
-    upvar #0 $varname var
-    global $varname
-
-    if {[info exists var(Nrows)] && 
-	[info exists var(Ncols)] &&
-	[info exists var(HLines)] &&
-	[info exists var(Header)]} {
-	return 1
-    } else {
-	return 0
-    }
-}
-
 proc SIASaveFn {varname fn writer} {
     upvar #0 $varname var
     global $varname
@@ -340,12 +325,23 @@ proc SIASaveFn {varname fn writer} {
     }
 
     # do we have a db?
-    if {![SIAValidDB $var(tbldb)]} {
+    if {![CATValidDB $var(tbldb)]} {
 	return
     }
 
     $writer $var(tbldb) $fn
     ARDone $varname
+}
+
+proc SIAUpdateFont {} {
+    global isia
+
+    foreach varname $isia(sias) {
+	upvar #0 $varname var
+	global $varname
+
+	$var(tbl) configure -font [font actual TkDefaultFont]
+    }
 }
 
 # Process Cmds

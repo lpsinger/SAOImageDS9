@@ -8,10 +8,11 @@ proc CATDef {} {
     global cat
     global icat
     global pcat
-    global wcs
+
+    set cat(id) 0
+    set cat(sym,font,msg) {}
 
     set icat(cats) {}
-
     set icat(rformat) arcmin
     set icat(radius) 15
     set icat(max) 5000
@@ -20,13 +21,10 @@ proc CATDef {} {
     set icat(show) 1
     set icat(edit) 0
     set icat(panto) 1
-
     set icat(minrows) 20
     set icat(mincols) 10
-
     set icat(key) {}
     set icat(key,update) {}
-
     set icat(match1) {}
     set icat(match2) {}
     set icat(return) 1and2
@@ -93,9 +91,6 @@ proc CATDef {} {
 		       {{XMM Observation} catxmmlog cds {B/xmm/xmmlog}} \
 		   }
 
-    set cat(id) 0
-    set cat(sym,font,msg) {}
-
     # prefs only
     set pcat(server) cds
     set pcat(loc) 500
@@ -110,8 +105,6 @@ proc CATDef {} {
     set pcat(sym,font,slant) roman
     set pcat(vot) 1
 }
-
-# Load via HTTP
 
 proc CATGetURL {varname} {
     upvar #0 $varname var

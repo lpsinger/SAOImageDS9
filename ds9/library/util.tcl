@@ -1051,6 +1051,8 @@ proc SetDefaultFont {which} {
 	UpdateScaleDialogFont
 	UpdateGraphFont
 	CATUpdateFont
+	SIAUpdateFont
+	FPUpdateFont
     }
 }
 

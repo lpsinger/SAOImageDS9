@@ -9,11 +9,20 @@ proc CATDialog {varname format catalog title action} {
     global cat
     global icat
     global pcat
-    global ds9
 
-    global pds9
+    global ds9
     global wcs
-   
+    global current
+
+    global debug
+    if {$debug(tcl,cat)} {
+	puts stderr "CATDialog $varname:$format:$catalog:$title:$action"
+    }
+
+    if {$current(frame) == {}} {
+	return
+    }
+
     # first determine if aready in use, then increment
     if {[lsearch $icat(cats) $varname] >= 0} {
 	incr cat(id)
@@ -23,24 +32,9 @@ proc CATDialog {varname format catalog title action} {
     upvar #0 $varname var
     global $varname
 
-    global debug
-    if {$debug(tcl,cat)} {
-	puts stderr "CATDialog $varname:$format:$catalog:$title:$action"
-    }
-
     # main dialog
     set var(top) ".${varname}"
     set var(mb) ".${varname}mb"
-
-    if {[winfo exists $var(top)]} {
-	raise $var(top)
-	return
-    }
-
-    global current
-    if {$current(frame) == {}} {
-	return
-    }
 
     # AR variables
     ARInit $varname CATServer
@@ -883,18 +877,6 @@ proc CATKey {which key} {
 
     set icat(key) {}
     set icat(key,update) {}
-}
-
-proc CATPageSetup {varname} {
-    upvar #0 $varname var
-    global $varname
-
-    global ds9
-    switch $ds9(wm) {
-	x11 -
-	aqua {}
-	win32 {win32 pm pagesetup}
-    }
 }
 
 proc CATPrint {varname} {

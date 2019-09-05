@@ -165,7 +165,6 @@ proc ProcessCommand {argv argc} {
 	    -export {incr i; ProcessExportCmd argv i}
 	    -exit -
 	    -quit {ProcessQuitCmd argv i}
-	    -frame {incr i; ProcessFrameCmd argv i}
 	    -fifo {
 		incr i
 		set fifo [lindex $argv $i]
@@ -183,6 +182,9 @@ proc ProcessCommand {argv argc} {
 	    }
 	    -file -
 	    -fits {set file(type) fits; CommandFitsCmd argv i}
+	    -footprint -
+	    -fp {incr i; ProcessFPCmd argv i}
+	    -frame {incr i; ProcessFrameCmd argv i}
 	    -geometry {
 		# already processed
 	    }
