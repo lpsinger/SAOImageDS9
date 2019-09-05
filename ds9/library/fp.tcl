@@ -23,7 +23,7 @@ proc FPDef {} {
 		       {{Chandra (NASA/CXC)} \
 			    fpcxc \
 			    {https://cxcfps.cfa.harvard.edu/cgi-bin/cda/footprint/get_vo_table.pl} \
-			    {inst=ACIS-S,ACIS-I,HRC-S,HRC-I} \
+			    {inst=ACIS-S,ACIS-I,HRC-S,HRC-I&} \
 			    get \
 			} \
 		       {{Hubble Legacy Archive (STSCI)} \

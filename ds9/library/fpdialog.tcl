@@ -210,7 +210,7 @@ proc FPDialog {varname title url opts method action} {
 
     set var(apply) [ttk::button $f.apply \
 			-text [msgcat::mc {Retrieve}] \
-			-command [list FPApply $varname 0]
+			-command [list FPApply $varname 0]]
     set var(cancel) [ttk::button $f.cancel -text \
 			 [msgcat::mc {Cancel}] \
 			 -command [list ARCancel $varname] \
@@ -296,7 +296,8 @@ proc FPDestroy {varname} {
 
     if {[info exists $var(tbldb)]} {
 	unset $var(tbldb)
-
+    }
+    
     set ii [lsearch $ifp(fps) $varname]
     if {$ii>=0} {
 	set ifp(fps) [lreplace $ifp(fps) $ii $ii]
@@ -317,7 +318,7 @@ proc FPDialogUpdate {varname} {
     }
 
     # do we have a db?
-    if {[CatValidDB $var(tbldb)]} {
+    if {[CATValidDB $var(tbldb)]} {
 	$var(mb).file entryconfig [msgcat::mc {Clear}] -state normal
 	$var(mb).file entryconfig [msgcat::mc {Copy to Regions}] -state normal
 	$var(mb).file entryconfig "[msgcat::mc {Print}]..." -state normal
@@ -330,6 +331,46 @@ proc FPDialogUpdate {varname} {
 
 	$var(top).buttons.clear configure -state disabled
     }
+}
+
+proc FPVOT {varname} {
+    upvar #0 $varname var
+    global $varname
+
+    global debug
+    if {$debug(tcl,fp)} {
+	puts stderr "FPVOT $varname"
+    }
+
+    # coord (degrees)
+    switch $var(skyformat) {
+	degrees {
+	    set xx $var(x)
+	    set yy $var(y)
+	}
+	sexagesimal {
+	    set xx [h2d [Sex2H $var(x)]]
+	    set yy [Sex2D $var(y)]
+	}
+    }
+
+    # radius (degrees)
+    switch $var(rformat) {
+	degrees {
+	    set rr $var(radius)
+	}
+	arcmin {
+	    set rr [expr $var(radius)/60.]
+	}
+	arcsec {
+	    set rr [expr $var(radius)/60./60.]
+	}
+    }
+
+    # query
+    set query "$var(opts)[http::formatQuery pos "$xx,$yy" size $rr]"
+
+    FPLoad $varname $var(url) $query
 }
 
 proc FPWCSMenuUpdate {varname} {
@@ -414,7 +455,7 @@ proc FPServer {varname} {
 
     if {($var(x) != {}) && ($var(y) != {}) && ($var(radius) != {})} {
 	ARStatus $varname [msgcat::mc {Contacting Image Server}]
-	SIAVOT $varname
+	FPVOT $varname
     } else {
 	ARError $varname [msgcat::mc {Please specify radius and either name or (ra,dec)}]
     }
