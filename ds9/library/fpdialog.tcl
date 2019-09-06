@@ -52,6 +52,9 @@ proc FPDialog {varname title url opts method action} {
     set var(show) $ifp(show)
     set var(panto) $ifp(panto)
 
+    set var(psystem) $var(system)
+    set var(psky) $var(sky)
+
     set var(blink) 0
     set var(blink,count) 0
     set var(blink,marker) {}

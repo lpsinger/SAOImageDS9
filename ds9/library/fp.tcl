@@ -304,7 +304,7 @@ proc FPGenerate {varname} {
     if {$var(show)} {
 	global reg
 	set reg {}
-	FPReg $varname {} 1 reg
+	FPReg $varname 1 reg
 	if {[info commands $var(frame)] != {}} {
 	    if {[$var(frame) has fits]} {
 		if {[catch {$var(frame) marker catalog command ds9 var reg}]} {
@@ -337,7 +337,7 @@ proc FPGenerateRegions {varname} {
 
     global reg
     set reg {}
-    FPReg $varname {} 0 reg
+    FPReg $varname 0 reg
     if {[info commands $var(frame)] != {}} {
 	if {[$var(frame) has fits]} {
 	    if {[catch {$var(frame) marker command ds9 var reg}]} {
@@ -348,45 +348,6 @@ proc FPGenerateRegions {varname} {
     }
 
     ARStatus $varname [msgcat::mc Done]
-}
-
-proc FPGenerateUpdate {varname row} {
-    upvar #0 $varname var
-    global $varname
-
-    global debug
-    if {$debug(tcl,fp)} {
-	puts stderr "FPGenerateUpdate $varname $row"
-    }
-
-    if {[info commands $var(frame)] == {}} {
-	return
-    }
-
-    if {![$var(frame) has fits]} {
-	return
-    }
-    
-    set id [$var(frame) get marker catalog "\{${varname}.${row}\}" id]
-    set sel [$var(frame) get marker catalog $id select]
-    set hh [$var(frame) get marker catalog $id highlite]
-
-    $var(frame) marker catalog "\{${varname}.${row}\}" delete
-    global reg
-    set reg {}
-    FPReg $varname $row 1 reg
-    if {$reg != {}} {
-	$var(frame) marker catalog command ds9 var reg
-
-	set id [$var(frame) get marker catalog "\{${varname}.${row}\}" id]
-	if {$sel} {
-	    $var(frame) marker catalog "\{${varname}.${row}\}" select
-	}
-	if {$hh} {
-	    $var(frame) marker catalog "\{${varname}.${row}\}" highlite
-	}
-    }
-    unset reg
 }
 
 proc FPConfigCols {varname} {
@@ -587,11 +548,6 @@ proc FPUpdateWCS {} {
 	    global $varname
 
 	    FPGenerate $varname
-
-	    # regenerate the plot if needed
-	    if {$var(plot)} {
-		FPPlotGenerate $varname
-	    }
 	}
     }
 }

@@ -5,13 +5,12 @@
 package provide DS9 1.0
 
 # catreg -- convert catalog table into region string
-proc FPReg {varname row interactive resultname} {
+proc FPReg {varname interactive resultname} {
     upvar $resultname result
 
     upvar #0 $varname var
     global $varname
     global $var(tbldb)
-    global $var(symdb)
 
     # init result
     set result {}
@@ -69,150 +68,46 @@ proc FPReg {varname row interactive resultname} {
 	default {set sys "$var(psystem); $var(psky)"}
     }
 
-    # symdb
-    set snrows [starbase_nrows $var(symdb)]
-    set sncond [starbase_colnum $var(symdb) condition]
-    set sncolor [starbase_colnum $var(symdb) color]
-    set snwidth [starbase_colnum $var(symdb) width]
-    set sndash [starbase_colnum $var(symdb) dash]
-    set snfont [starbase_colnum $var(symdb) font]
-    set snfontsize [starbase_colnum $var(symdb) fontsize]
-    set snfontweight [starbase_colnum $var(symdb) fontweight]
-    set snfontslant [starbase_colnum $var(symdb) fontslant]
-    set sntext [starbase_colnum $var(symdb) text]
-
     # for each row in the catalog table ...
-    if {[string is integer -strict $row]} {
-	set start $row
-	set end $row
-    } else {
-	set start 1
-	set end $nrows
-    }
+    for {set ii 1} {$ii <= $nrows} {incr ii} {
 
-    # look for need to eval colnames (only used for conditionals and text
-    set doEval 0
-    for {set jj 1} {$jj <= $snrows} {incr jj} {
-	set cond [starbase_get $var(symdb) $jj $sncond]
-	set text [starbase_get $var(symdb) $jj $sntext]
-	if {$cond!={} || $text!={}} {
-	    set doEval 1
-	}
-    }
-
-    for {set ii $start} {$ii <= $end} {incr ii} {
-	if {$doEval} {
-	    # define each colunm variable
-	    foreach col $cols {
-		set val [starbase_get $var(tbldb) $ii \
-			     [starbase_colnum $var(tbldb) $col]]
-		# here's a tough one-- what to do if the col is blank
-		# for now, just set it to '0'
-		if {[string trim "$val"] == {}} {
-		    set val 0
-		}
-		eval "set \{$col\} \{$val\}"
+	# define each colunm variable
+	foreach col $cols {
+	    set val [starbase_get $var(tbldb) $ii \
+			 [starbase_colnum $var(tbldb) $col]]
+	    # here's a tough one-- what to do if the col is blank
+	    # for now, just set it to '0'
+	    if {[string trim "$val"] == {}} {
+		set val 0
 	    }
+	    eval "set \{$col\} \{$val\}"
 	}
 
-	# look through each filter
-	for {set jj 1} {$jj <= $snrows} {incr jj} {
-	    # eval condition
-	    set cond [starbase_get $var(symdb) $jj $sncond]
-
-	    if {$cond != {}} {
-		set found 0
-
-		# subst any column vars
-		if {[catch {subst $cond} cc]} {
-		    Error "Unable to evaluate condition $cc"
-		    return
-		}
-		# evaluate filter
-		if {[catch {expr $cc} found]} {
-		    Error "Unable to evaluate condition $cc"
-		    return
-		}
-	    } else {
-		set found 1
-	    }
-
-	    # if not true, goto the next filter
-	    if {!$found} {
-		continue
-	    }
-
-	    # xx
-	    set xx [starbase_get $var(tbldb) $ii $colx]
-	    switch $xformat {
-		{h:m:s} -
-		{d:m:s} {set xx [uformat $xformat d $xx]}
-	    }
-
-	    # yy
-	    set yy [starbase_get $var(tbldb) $ii $coly]
-	    if {$yformat == {d:m:s}} {
-		set yy [uformat $yformat d $yy]
-	    }
-
-	    # color
-	    set color [starbase_get $var(symdb) $jj $sncolor]
-	    if {$color == {}} {
-		set color green
-	    }
-
-	    # width
-	    set width [starbase_get $var(symdb) $jj $snwidth]
-	    if {$width == {}} {
-		set width 1
-	    }
-
-	    # dash
-	    set dash [starbase_get $var(symdb) $jj $sndash]
-	    if {$dash == {}} {
-		set dash 0
-	    }
-
-            #font
-	    set font [starbase_get $var(symdb) $jj $snfont]
-	    if {$font == {}} {
-		set font helvetica
-	    }
-	    set fontsize [starbase_get $var(symdb) $jj $snfontsize]
-	    if {$fontsize == {}} {
-		set fontsize 10
-	    }
-	    set fontweight [starbase_get $var(symdb) $jj $snfontweight]
-	    if {$fontweight == {}} {
-		set fontweight normal
-	    }
-	    set fontslant [starbase_get $var(symdb) $jj $snfontslant]
-	    if {$fontslant == {}} {
-		set fontslant roman
-	    }
-
-	    # text
-	    set text [starbase_get $var(symdb) $jj $sntext]
-	    if {$text != {}} {
-		if {[catch {subst $text} tt]} {
-		    Error "Unable to evaluate text $text"
-		    return
-		} else {
-		    set text $tt
-		}
-	    }
-
-	    # final substitution and append result
-	    # init result for substitutions
-	    if {$interactive} {
-	        set template "\${sys};point(\${xx} \${yy}) # color=\${color} width=\${width} dash=\${dash} font=\{${font} ${fontsize} ${fontweight} ${fontslant}\} text=\{\${text}\} tag={${varname}} tag={${varname}.\${ii}} select=0 edit=0 move=0 rotate=0 delete=1 highlite=1 callback=delete FPDeleteCB {${varname}.\${ii}} callback=highlite FPHighliteCB {${varname}.\${ii}} callback=unhighlite FPUnhighliteCB {${varname}.\${ii}}\n"
-	    } else {
-		set template "\${sys};point(\${xx} \${yy}) # color=\${color} width=\${width} dash=\${dash} text=\{\${text}\} tag=$varname\n"
-	    }
-	    append result [subst $template]
-
-	    # ok, we are done
-	    break
+	# xx
+	set xx [starbase_get $var(tbldb) $ii $colx]
+	switch $xformat {
+	    {h:m:s} -
+	    {d:m:s} {set xx [uformat $xformat d $xx]}
 	}
+
+	# yy
+	set yy [starbase_get $var(tbldb) $ii $coly]
+	if {$yformat == {d:m:s}} {
+	    set yy [uformat $yformat d $yy]
+	}
+
+	# props
+	set color green
+	set width 1
+	set dash 0
+
+	# final substitution and append result
+	# init result for substitutions
+	if {$interactive} {
+	    set template "\${sys};point(\${xx} \${yy}) # color=\${color} width=\${width} dash=\${dash} tag={${varname}} tag={${varname}.\${ii}} select=0 edit=0 move=0 rotate=0 delete=1 highlite=1 callback=delete FPDeleteCB {${varname}.\${ii}} callback=highlite FPHighliteCB {${varname}.\${ii}} callback=unhighlite FPUnhighliteCB {${varname}.\${ii}}\n"
+	} else {
+	    set template "\${sys};point(\${xx} \${yy}) # color=\${color} width=\${width} dash=\${dash} tag=$varname\n"
+	}
+	append result [subst $template]
     }
 }

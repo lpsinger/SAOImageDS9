@@ -40,8 +40,8 @@ proc FPSelectBrowseCmd {varname ss rc} {
 	puts stderr "FPSelectBrowseCmd $varname ss=$ss rc=$rc"
     }
 
-    global $var(catdb)
-    if {![FPValidDB $var(catdb)]} {
+    global $var(tbldb)
+    if {![CATValidDB $var(tbldb)]} {
 	return
     }
 
@@ -125,8 +125,8 @@ proc FPSelectRows {varname src rowlist cc} {
 	return
     }
 
-    global $var(catdb)
-    if {![FPValidDB $var(catdb)]} {
+    global $var(tbldb)
+    if {![CATValidDB $var(tbldb)]} {
 	return
     }
 
