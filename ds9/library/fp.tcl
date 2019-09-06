@@ -24,13 +24,13 @@ proc FPDef {} {
 			    fpcxc \
 			    {https://cxcfps.cfa.harvard.edu/cgi-bin/cda/footprint/get_vo_table.pl} \
 			    {inst=ACIS-S,ACIS-I,HRC-S,HRC-I&} \
-			    get \
+			    stcs \
 			} \
 		       {{Hubble Legacy Archive (STSCI)} \
 			    fphla \
 			    {http://hla.stsci.edu/cgi-bin/hlaSIAP.cgi} \
 			    {} \
-			    get \
+			    regionSTCS \
 			} \
 		   }
 }
@@ -44,10 +44,10 @@ proc FPAnalysisMenu {mb} {
 	set vars [lindex $ff 1]
 	set url [lindex $ff 2]
 	set opts [lindex $ff 3]
-	set method [lindex $ff 4]
+	set colreg [lindex $ff 4]
 
 	$mb add command -label $title \
-	    -command [list FPDialog $vars $title $url $opts $method apply]
+	    -command [list FPDialog $vars $title $url $opts $colreg apply]
     }
 }
 
@@ -194,9 +194,7 @@ proc FPLoadDone {varname} {
 	puts stderr "FPLoadDone $varname"
     }
 
-    FPConfigCols $varname
     FPTable $varname
-
     FPDialogUpdate $varname
 }
 
@@ -308,6 +306,7 @@ proc FPGenerate {varname} {
 	if {[info commands $var(frame)] != {}} {
 	    if {[$var(frame) has fits]} {
 		if {[catch {$var(frame) marker catalog command ds9 var reg}]} {
+		    puts $reg
 		    ARError $varname "[msgcat::mc {Internal Parse Error}]"
 		    return
 		}
@@ -348,192 +347,6 @@ proc FPGenerateRegions {varname} {
     }
 
     ARStatus $varname [msgcat::mc Done]
-}
-
-proc FPConfigCols {varname} {
-    upvar #0 $varname var
-    global $varname
-    global $var(tbldb)
-
-    set var(colx) {}
-    set var(coly) {}
-
-    if {![CATValidDB $var(tbldb)]} {
-	return
-    }
-
-    if {[starbase_ncols $var(tbldb)] < 2} {
-	return
-    }
-
-    # determine psystem/psky if present in header
-    # psystem has already been adjusted based on loaded fits at menu creation
-    switch -- $var(psystem) {
-	image -
-	physical -
-	amplifier -
-	detector {
-	    set cols {
-		"X" "Y"
-	    }
-	    foreach {colx coly} $cols {
-		if {!([lsearch [starbase_columns $var(tbldb)] $colx] == -1) &&
-		    !([lsearch [starbase_columns $var(tbldb)] $coly] == -1)} {
-		    set var(colx) $colx
-		    set var(coly) $coly
-		    return
-		}
-
-		# try lower case
-		set colx [string tolower $colx]
-		set coly [string tolower $coly]
-		if {!([lsearch [starbase_columns $var(tbldb)] $colx] == -1) &&
-		    !([lsearch [starbase_columns $var(tbldb)] $coly] == -1)} {
-		    set var(colx) $colx
-		    set var(coly) $coly
-		    return
-		}
-	    }
-
-	    # default
-	    set var(colx) [starbase_colname $var(tbldb) 1]
-	    set var(coly) [starbase_colname $var(tbldb) 2]
-	    
-	    return
-	}
-	default {
-	    if {[info commands $var(frame)] == {}} {
-		# linear
-		set var(colx) [starbase_colname $var(tbldb) 1]
-		set var(coly) [starbase_colname $var(tbldb) 2]
-
-		return
-	    } elseif {![$var(frame) has wcs celestial $var(psystem)]} {
-		# linear
-		set var(colx) [starbase_colname $var(tbldb) 1]
-		set var(coly) [starbase_colname $var(tbldb) 2]
-
-		return
-	    } else {
-		if {![catch {starbase_hdrget $var(tbldb) equinox} sys]} {
-		    switch -- $sys {
-			1950.0 -
-			B1950 {
-			    set var(psystem) wcs
-			    set var(psky) fk4
-			}
-			2000.0 -
-			J2000 {
-			    set var(psystem) wcs
-			    set var(psky) fk5
-			}
-		    }
-		}
-
-		switch -- $var(psky) {
-		    fk5 -
-		    icrs {
-			set cols {
-			    "_RAJ2000" "_DEJ2000"
-			    "_RAJ2000" "_DECJ2000"
-			    "RAJ2000" "DEJ2000"
-			    "RAJ2000" "DECJ2000"
-			    "RA_J2000" "DE_J2000"
-			    "RA_J2000" "DEC_J2000"
-			    "RA (J2000)" "Dec (J2000)"
-			    "RA" "DEC"
-			    "RA" "DECL"
-			    "RA" "Dec"
-			    "RA(deg)" "DEC(deg)"
-			}
-			if {[FPConfigColsSearch $varname $cols]} {
-			    return
-			}
-
-			# next, look for an UCD (via VOTABLE)
-			set db $var(tbldb)
-			upvar #0 $db T
-			for {set cc 0} {$cc < $T(Ncols)} {incr cc} {
-			    if {[info exists ${db}(Ucd)]} {
-				switch -- [string tolower [string range [lindex $T(Ucd) $cc] 0 8]] {
-				    pos.eq.ra {set var(colx) [lindex $T(Header) $cc]}
-				    pos.eq.de {set var(coly) [lindex $T(Header) $cc]}
-				}
-			    }
-			}
-
-			if {$var(colx) != {} && $var(coly) != {}} {
-			    return
-			}
-		    }
-		    fk4 {
-			set cols {
-			    "_RAB1950" "_DEB1950"
-			    "RA_B1950" "DEC_B1950"
-			    "RA (B1950)" "Dec (1950)"
-			    "RA" "DEC"
-			    "RA" "DECL"
-			    "RA" "Dec"
-			    "RA(deg)" "DEC(deg)"
-			}
-			if {[FPConfigColsSearch $varname $cols]} {
-			    return
-			}
-		    }
-		    galactic {
-			set cols {
-			    "_GLON" "_GLAT"
-			    "LON" "LAT"
-			    "LON.Gal(deg)" "LAT.Gal(deg)"
-			}
-			if {[FPConfigColsSearch $varname $cols]} {
-			    return
-			}
-		    }
-		    ecliptic {
-			set cols {
-			    "_ELON" "_ELAT"
-			    "LON.Ecl(deg)" "LAT.Ecl(deg)"
-			}
-			if {[FPConfigColsSearch $varname $cols]} {
-			    return
-			}
-		    }
-		}
-
-		# default
-		set var(colx) [starbase_colname $var(tbldb) 1]
-		set var(coly) [starbase_colname $var(tbldb) 2]
-	    }
-	}
-    }
-}
-
-proc FPConfigColsSearch {varname cols} {
-    upvar #0 $varname var
-    global $varname
-    global $var(tbldb)
-
-    foreach {colx coly} $cols {
-	if {!([lsearch [starbase_columns $var(tbldb)] $colx] == -1) &&
-	    !([lsearch [starbase_columns $var(tbldb)] $coly] == -1)} {
-	    set var(colx) $colx
-	    set var(coly) $coly
-	    return 1
-	}
-
-	# try lower case
-	set colx [string tolower $colx]
-	set coly [string tolower $coly]
-	if {!([lsearch [starbase_columns $var(tbldb)] $colx] == -1) &&
-	    !([lsearch [starbase_columns $var(tbldb)] $coly] == -1)} {
-	    set var(colx) $colx
-	    set var(coly) $coly
-	    return 1
-	}
-    }
-
-    return 0
 }
 
 proc FPUpdateWCS {} {
@@ -610,10 +423,10 @@ proc FPCmdRef {ref} {
 	    set vars [lindex $mm 1]
 	    set url [lindex $mm 2]
 	    set opts [lindex $mm 3]
-	    set method [lindex $mm 4]
+	    set colreg [lindex $mm 4]
 
 	    if {$title != {-} && "fp${ref}" == $vars} {
-		FPDialog $vars $title $url $opts $method sync
+		FPDialog $vars $title $url $opts $colreg sync
 		set cvarname fp${ref}
 	    }
 	}

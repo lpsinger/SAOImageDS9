@@ -4,7 +4,7 @@
 
 package provide DS9 1.0
 
-proc FPDialog {varname title url opts method action} {
+proc FPDialog {varname title url opts colreg action} {
     global fp
     global ifp
     global pfp
@@ -15,7 +15,7 @@ proc FPDialog {varname title url opts method action} {
    
     global debug
     if {$debug(tcl,fp)} {
-	puts stderr "FPDialog $varname:$title:$url:$opts:$action:$method"
+	puts stderr "FPDialog $varname:$title:$url:$opts:$action:$colreg"
     }
 
     if {$current(frame) == {}} {
@@ -62,6 +62,7 @@ proc FPDialog {varname title url opts method action} {
     set var(url) $url
     set var(title) $title
     set var(opts) $opts
+    set var(colreg) $colreg
 
     # create the window
     set w $var(top)
@@ -372,7 +373,6 @@ proc FPVOT {varname} {
 
     # query
     set query "$var(opts)[http::formatQuery pos "$xx,$yy" size $rr]"
-
     FPLoad $varname $var(url) $query
 }
 
