@@ -2432,6 +2432,11 @@ void Base::markerLayerCmd(MarkerLayer layer) {
     undoMarkers = &undoCatalogMarkers;
     pasteMarkers = &pasteCatalogMarkers;
     break;
+  case FOOTPRINT:
+    markers = &footprintMarkers;
+    undoMarkers = &undoFootprintMarkers;
+    pasteMarkers = &pasteFootprintMarkers;
+    break;
   default:
     // na
     break;

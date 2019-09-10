@@ -789,3 +789,20 @@ proc CATRelease {which x y} {
 	}
     }
 }
+
+proc CATKey {which key} {
+    global icat
+    global ds9
+
+    set icat(key) $key
+    set icat(key,update) {}
+
+    $which marker catalog key
+    foreach rr $icat(key,update) {
+	eval "CATGenerateUpdate [lindex $rr 0] [lindex $rr 1]"
+    }
+
+    set icat(key) {}
+    set icat(key,update) {}
+}
+

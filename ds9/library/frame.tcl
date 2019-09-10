@@ -573,6 +573,7 @@ proc EnterFrame {which x y} {
 	    set y [lindex $coord 1]
 	}
 	catalog -
+	footprint -
 	pan -
 	zoom -
 	rotate -
@@ -623,12 +624,13 @@ proc LeaveFrame {which} {
 	none -
 	pointer -
 	region -
+	catalog -
+	footprint -
 	colorbar -
 	pan -
 	zoom -
 	rotate -
 	crop -
-	catalog -
 	examine -
 	iexam -
 	3d {
@@ -683,7 +685,8 @@ proc DoMotion {which x y cursor1 cursor2} {
     switch -- $current(mode) {
 	pointer -
 	region -
-	catalog {
+	catalog -
+	footprint {
 	    if {$which == $current(frame)} {
 		MarkerCursor $which $x $y $cursor1 $cursor2
 	    }
@@ -754,6 +757,34 @@ proc Button1Frame {which x y} {
 	    }
 	    UpdateMagnifier $which $x $y
 	}
+	catalog {
+	    if {$which == $current(frame)} {
+		CATButton $which $x $y
+	    } else {
+		# we need this cause MarkerMotion maybe called, 
+		# and we don't want it
+		set imarker(motion) none
+		set imarker(handle) -1
+
+		set ds9(next) $which
+		GotoFrame
+	    }
+	    UpdateMagnifier $which $x $y
+	}
+	footprint {
+	    if {$which == $current(frame)} {
+		FPButton $which $x $y
+	    } else {
+		# we need this cause MarkerMotion maybe called, 
+		# and we don't want it
+		set imarker(motion) none
+		set imarker(handle) -1
+
+		set ds9(next) $which
+		GotoFrame
+	    }
+	    UpdateMagnifier $which $x $y
+	}
 	crosshair {
 	    CrosshairButton $which $x $y
 
@@ -777,20 +808,6 @@ proc Button1Frame {which x y} {
 	rotate {RotateButton $which $x $y}
 	crop {
 	    CropButton $which $x $y
-	    UpdateMagnifier $which $x $y
-	}
-	catalog {
-	    if {$which == $current(frame)} {
-		CATButton $which $x $y
-	    } else {
-		# we need this cause MarkerMotion maybe called, 
-		# and we don't want it
-		set imarker(motion) none
-		set imarker(handle) -1
-
-		set ds9(next) $which
-		GotoFrame
-	    }
 	    UpdateMagnifier $which $x $y
 	}
 	examine {ExamineButton $which $x $y}
@@ -820,6 +837,18 @@ proc ShiftButton1Frame {which x y} {
 	    }
 	    UpdateMagnifier $which $x $y
 	}
+	catalog {
+	    if {$which == $current(frame)} {
+		CATShift $which $x $y
+	    }
+	    UpdateMagnifier $which $x $y
+	}
+	footprint {
+	    if {$which == $current(frame)} {
+		FPShift $which $x $y
+	    }
+	    UpdateMagnifier $which $x $y
+	}
 	crosshair {}
 	colorbar {}
 	pan {}
@@ -827,12 +856,6 @@ proc ShiftButton1Frame {which x y} {
 	rotate -
 	crop {
 	    Crop3dButton $which $x $y 0
-	    UpdateMagnifier $which $x $y
-	}
-	catalog {
-	    if {$which == $current(frame)} {
-		CATShift $which $x $y
-	    }
 	    UpdateMagnifier $which $x $y
 	}
 	examine {}
@@ -859,7 +882,8 @@ proc ControlButton1Frame {which x y} {
 	none {}
 	pointer -
 	region -
-	catalog {
+	catalog -
+	footprint {
 	    if {$which == $current(frame)} {
 		MarkerControl $which $x $y
 	    } else {
@@ -903,7 +927,8 @@ proc ControlShiftButton1Frame {which x y} {
 	none {}
 	pointer -
 	region -
-	catalog {
+	catalog -
+	footprint {
 	    if {$which == $current(frame)} {
 		MarkerControlShift $which $x $y
 	    } else {
@@ -954,6 +979,26 @@ proc Motion1Frame {which x y} {
 	    UpdateGraphData $which $x $y canvas
 	    UpdateMagnifier $which $x $y
 	}
+	catalog {
+	    if {$which == $current(frame)} {
+		CATMotion $which $x $y
+	    }
+
+	    UpdateInfoBox $which $x $y canvas
+	    UpdatePixelTableDialog $which $x $y canvas
+	    UpdateGraphData $which $x $y canvas
+	    UpdateMagnifier $which $x $y
+	}
+	footprint {
+	    if {$which == $current(frame)} {
+		FPMotion $which $x $y
+	    }
+
+	    UpdateInfoBox $which $x $y canvas
+	    UpdatePixelTableDialog $which $x $y canvas
+	    UpdateGraphData $which $x $y canvas
+	    UpdateMagnifier $which $x $y
+	}
 	crosshair {
 	    if {$ds9(b1)} {
 		CrosshairButton $which $x $y
@@ -995,16 +1040,6 @@ proc Motion1Frame {which x y} {
 
 	    UpdateMagnifier $which $x $y
 	}
-	catalog {
-	    if {$which == $current(frame)} {
-		CATMotion $which $x $y
-	    }
-
-	    UpdateInfoBox $which $x $y canvas
-	    UpdatePixelTableDialog $which $x $y canvas
-	    UpdateGraphData $which $x $y canvas
-	    UpdateMagnifier $which $x $y
-	}
 	examine {}
 	iexam {}
 	3d {
@@ -1036,6 +1071,16 @@ proc Release1Frame {which x y} {
 	region {
 	    if {$which == $current(frame)} {
 		MarkerRelease $which $x $y
+	    }
+	}
+	catalog {
+	    if {$which == $current(frame)} {
+		CATRelease $which $x $y
+	    }
+	}
+	footprint {
+	    if {$which == $current(frame)} {
+		FPRelease $which $x $y
 	    }
 	}
 	crosshair {
@@ -1075,11 +1120,6 @@ proc Release1Frame {which x y} {
 		Crop3dRelease $which $x $y 1
 	    }
 	}
-	catalog {
-	    if {$which == $current(frame)} {
-		CATRelease $which $x $y
-	    }
-	}
 	examine {}
 	iexam {}
 	3d {}
@@ -1112,13 +1152,14 @@ proc Double1Frame {which x y} {
 	    }
 	}
 	none -
+	catalog -
+	footprint -
 	crosshair -
 	colorbar -
 	pan -
 	zoom -
 	rotate -
 	crop -
-	catalog -
 	examine -
 	iexam {}
 	3d {3DDouble $which}
@@ -1138,13 +1179,14 @@ proc DoubleRelease1Frame {which x y} {
 	none -
 	pointer -
 	region -
+	catalog -
+	footprint -
 	crosshair -
 	colorbar -
 	pan -
 	zoom -
 	rotate -
 	crop -
-	catalog -
 	examine -
 	iexam -
 	3d {}
@@ -1376,6 +1418,31 @@ proc KeyFrame {which K A xx yy} {
 		G {GroupCreateSilent}
 	    }    
 	}
+	catalog {
+	    switch -- $K {
+		Up -
+		k {MarkerArrowKey $which 0 -1}
+		Down -
+		j {MarkerArrowKey $which 0 1}
+		Left -
+		h {MarkerArrowKey $which -1 0}
+		Right -
+		l {MarkerArrowKey $which 1 0}
+	    }	    
+	    CATKey $which $K
+	}
+	footprint {
+	    switch -- $K {
+		Up -
+		k {MarkerArrowKey $which 0 -1}
+		Down -
+		j {MarkerArrowKey $which 0 1}
+		Left -
+		h {MarkerArrowKey $which -1 0}
+		Right -
+		l {MarkerArrowKey $which 1 0}
+	    }	    
+	}
 	crosshair {
 	    switch -- $K {
 		c {
@@ -1409,19 +1476,6 @@ proc KeyFrame {which K A xx yy} {
 		l {PanCanvas -1 0}
 	    }
 	    UpdateMagnifier $which $xx $yy
-	}
-	catalog {
-	    switch -- $K {
-		Up -
-		k {MarkerArrowKey $which 0 -1}
-		Down -
-		j {MarkerArrowKey $which 0 1}
-		Left -
-		h {MarkerArrowKey $which -1 0}
-		Right -
-		l {MarkerArrowKey $which 1 0}
-	    }	    
-	    CATKey $which $K
 	}
 	iexam {IExamKey $which $K $xx $yy}
 	colorbar -

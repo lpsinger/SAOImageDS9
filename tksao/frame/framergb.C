@@ -1074,6 +1074,7 @@ void FrameRGB::setRGBChannelCmd(const char* c)
   // execute any update callbacks
   updateCBMarkers(&userMarkers);
   updateCBMarkers(&catalogMarkers);
+  updateCBMarkers(&footprintMarkers);
 
  // always update
   update(BASE);

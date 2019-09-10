@@ -233,6 +233,7 @@ static void setProps(unsigned short* props, unsigned short prop, int value);
 %token FK5_
 %token FONT_
 %token FORMAT_
+%token FOOTPRINT_
 %token FROM_
 %token FRONT_
 %token FULL_
@@ -2441,16 +2442,17 @@ markerInitProp : {
 	;
 
 markerLayer : /* empty */ {fr->markerLayerCmd(Base::USER);}
+	| REGION_ {fr->markerLayerCmd(Base::USER);}
+	| CATALOG_  {fr->markerLayerCmd(Base::CATALOG);}
+	| FOOTPRINT_  {fr->markerLayerCmd(Base::FOOTPRINT);}
 	| POINTER_ {
 	  // backward compatibility
 	  fr->markerLayerCmd(Base::USER);
 	  }
-	| REGION_ {fr->markerLayerCmd(Base::USER);}
 	| USER_ {
 	  // backward compatibility
 	  fr->markerLayerCmd(Base::USER);
 	  }
-	| CATALOG_  {fr->markerLayerCmd(Base::CATALOG);}
 	;
 
 markerList : markerFormat coordSystem skyFrame skyFormat 

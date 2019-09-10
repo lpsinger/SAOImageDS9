@@ -454,12 +454,13 @@ proc RefreshInfoBox {which} {
 	    none -
 	    pointer -
 	    region -
+	    catalog -
+	    footprint -
 	    colorbar -
 	    pan -
 	    zoom -
 	    rotate -
 	    crop -
-	    catalog -
 	    examine -
 	    iexam -
 	    3d {

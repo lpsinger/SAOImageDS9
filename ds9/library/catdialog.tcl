@@ -863,22 +863,6 @@ proc CATHeader {varname} {
 	80 20 insert top [CATGetHeader $varname]
 }
 
-proc CATKey {which key} {
-    global icat
-    global ds9
-
-    set icat(key) $key
-    set icat(key,update) {}
-
-    $which marker catalog key
-    foreach rr $icat(key,update) {
-	eval "CATGenerateUpdate [lindex $rr 0] [lindex $rr 1]"
-    }
-
-    set icat(key) {}
-    set icat(key,update) {}
-}
-
 proc CATPrint {varname} {
     upvar #0 $varname var
     global $varname
