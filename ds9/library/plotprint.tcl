@@ -9,9 +9,10 @@ proc PlotPSPrint {varname} {
     global $varname
 
     if {[PlotPrintDialog]} {
-	if {[catch {PlotPostScript $varname} printError]} {
-	    Error "[msgcat::mc {An error has occurred while printing}] $printError"
-	}
+	PlotPostScript $varname
+#	if {[catch {PlotPostScript $varname} printError]} {
+#	    Error "[msgcat::mc {An error has occurred while printing}] $printError"
+#	}
     }
 }
 
@@ -22,15 +23,9 @@ proc PlotPostScript {varname} {
     global ps
     global ds9
 
-    # set postscript fonts
-    $var(graph) configure -font "$var(graph,title,family) $var(graph,title,size) $var(graph,title,weight) $var(graph,title,slant)"
-
-    $var(graph) xaxis configure -tickfont "$var(axis,font,family) $var(axis,font,size) $var(axis,font,weight) $var(axis,font,slant)" -titlefont "$var(axis,title,family) $var(axis,title,size) $var(axis,title,weight) $var(axis,title,slant)"
-
-    $var(graph) yaxis configure -tickfont "$var(axis,font,family) $var(axis,font,size) $var(axis,font,weight) $var(axis,font,slant)" -titlefont "$var(axis,title,family) $var(axis,title,size) $var(axis,title,weight) $var(axis,title,slant)"
-
-    $var(graph) legend configure -font "$var(legend,font,family) $var(legend,font,size) $var(legend,font,weight) $var(legend,font,slant)" -titlefont "$var(legend,title,family) $var(legend,title,size) $var(legend,title,weight) $var(legend,title,slant)"
-
+    #
+    # Options
+    #
     set options "-decorations false"
 
     # Color
@@ -53,8 +48,8 @@ proc PlotPostScript {varname} {
     }
 
     # Size
-    set ww [expr [winfo width $var(graph)]*$ps(scale)/100./$scaling]
-    set hh [expr [winfo height $var(graph)]*$ps(scale)/100./$scaling]
+    set ww [expr [winfo width $var(top)]*$ps(scale)/100./$scaling]
+    set hh [expr [winfo height $var(top)]*$ps(scale)/100./$scaling]
     append options " -width $ww -height $hh"
 
     # Page size
@@ -86,27 +81,78 @@ proc PlotPostScript {varname} {
 	landscape {append options " -landscape true"}
     }
 
-    if {$ps(dest) == "file" && $ps(filename) != {}} {
-	eval $var(graph) postscript output $ps(filename) $options
-    } else {
-	set ch [open "| $ps(cmd)" w]
-	puts $ch [eval $var(graph) postscript output $options]
-	close $ch
+    #
+    # For each graph
+    #
+    foreach cc $var(graphs) {
+
+	# set postscript fonts
+	$var($cc,graph) configure -font "$var(graph,title,family) $var(graph,title,size) $var(graph,title,weight) $var(graph,title,slant)"
+
+	$var($cc,graph) xaxis configure -tickfont "$var(axis,font,family) $var(axis,font,size) $var(axis,font,weight) $var(axis,font,slant)" -titlefont "$var(axis,title,family) $var(axis,title,size) $var(axis,title,weight) $var(axis,title,slant)"
+
+	$var($cc,graph) yaxis configure -tickfont "$var(axis,font,family) $var(axis,font,size) $var(axis,font,weight) $var(axis,font,slant)" -titlefont "$var(axis,title,family) $var(axis,title,size) $var(axis,title,weight) $var(axis,title,slant)"
+
+	$var($cc,graph) legend configure -font "$var(legend,font,family) $var(legend,font,size) $var(legend,font,weight) $var(legend,font,slant)" -titlefont "$var(legend,title,family) $var(legend,title,size) $var(legend,title,weight) $var(legend,title,slant)"
+
+	set var($cc,ps) [eval $var($cc,graph) postscript output $options]
+
+	# reset fonts
+	$var($cc,graph) configure \
+	    -font "{$ds9($var(graph,title,family))} $var(graph,title,size) $var(graph,title,weight) $var(graph,title,slant)"
+
+	$var($cc,graph) xaxis configure \
+	    -tickfont "{$ds9($var(axis,font,family))} $var(axis,font,size) $var(axis,font,weight) $var(axis,font,slant)" \
+	    -titlefont "{$ds9($var(axis,title,family))} $var(axis,title,size) $var(axis,title,weight) $var(axis,title,slant)"
+
+	$var($cc,graph) yaxis configure \
+	    -tickfont "{$ds9($var(axis,font,family))} $var(axis,font,size) $var(axis,font,weight) $var(axis,font,slant)" \
+	    -titlefont "{$ds9($var(axis,title,family))} $var(axis,title,size) $var(axis,title,weight) $var(axis,title,slant)"
+
+	$var($cc,graph) legend configure \
+	    -font "{$ds9($var(legend,font,family))} $var(legend,font,size) $var(legend,font,weight) $var(legend,font,slant)" \
+	    -titlefont "{$ds9($var(legend,title,family))} $var(legend,title,size) $var(legend,title,weight) $var(legend,title,slant)"
     }
 
-    # reset fonts
-    $var(graph) configure \
-	-font "{$ds9($var(graph,title,family))} $var(graph,title,size) $var(graph,title,weight) $var(graph,title,slant)"
+    # channel
+    if {$ps(dest) == "file" && $ps(filename) != {}} {
+	set ch [open $ps(filename) w]
+    } else {
+	set ch [open "| $ps(cmd)" w]
+    }
+    set first [lindex $var(graphs) 0]
 
-    $var(graph) xaxis configure \
-	-tickfont "{$ds9($var(axis,font,family))} $var(axis,font,size) $var(axis,font,weight) $var(axis,font,slant)" \
-	-titlefont "{$ds9($var(axis,title,family))} $var(axis,title,size) $var(axis,title,weight) $var(axis,title,slant)"
+    # prolog
+    set bb [string first {%%EndSetup} $var($first,ps)]
+    set bb [expr $bb+9]
+    puts $ch [string range $var($first,ps) 0 $bb]
 
-    $var(graph) yaxis configure \
-	-tickfont "{$ds9($var(axis,font,family))} $var(axis,font,size) $var(axis,font,weight) $var(axis,font,slant)" \
-	-titlefont "{$ds9($var(axis,title,family))} $var(axis,title,size) $var(axis,title,weight) $var(axis,title,slant)"
+    foreach cc $var(graphs) {
+	puts "graph$cc"
+	set bb {fail}
+	regexp {%%BoundingBox:\s\d+\s\d+\s\d+\s\d+} $var($cc,ps) bb
+	puts $bb
 
-    $var(graph) legend configure \
-	-font "{$ds9($var(legend,font,family))} $var(legend,font,size) $var(legend,font,weight) $var(legend,font,slant)" \
-	-titlefont "{$ds9($var(legend,title,family))} $var(legend,title,size) $var(legend,title,weight) $var(legend,title,slant)"
+	# begin
+	set bb [string first {%%EndSetup} $var($cc,ps)]
+	set bb [expr $bb+9]
+	incr bb
+
+	# end
+	set ee [string last {showpage} $var($cc,ps)]
+	incr ee -1
+
+	# body
+	puts $ch [string range $var($cc,ps) $bb $ee]
+    }
+
+    # trailer
+    set ee [string last {showpage} $var($first,ps)]
+    puts $ch [string range $var($first,ps) $ee end]
+    
+    close $ch
+
+    foreach cc $var(graphs) {
+	unset var($cc,ps)
+    }
 }
