@@ -48,8 +48,10 @@ proc PlotPostScript {varname} {
     }
 
     # Size
-    set ww [expr [winfo width $var(top)]*$ps(scale)/100./$scaling]
-    set hh [expr [winfo height $var(top)]*$ps(scale)/100./$scaling]
+    set width [winfo width $var(top)]
+    set height [winfo height $var(top)]
+    set ww [expr $width*$ps(scale)/100./$scaling]
+    set hh [expr $height*$ps(scale)/100./$scaling]
     append options " -width $ww -height $hh"
 
     # Page size
@@ -128,10 +130,19 @@ proc PlotPostScript {varname} {
     puts $ch [string range $var($first,ps) 0 $bb]
 
     foreach cc $var(graphs) {
-	puts "graph$cc"
-	set bb {fail}
-	regexp {%%BoundingBox:\s\d+\s\d+\s\d+\s\d+} $var($cc,ps) bb
-	puts $bb
+	set relw $var($cc,relw)
+	set relh $var($cc,relh)
+	set relx [expr $width*$var($cc,relx)]
+	set rely [expr $height*$var($cc,rely)]
+	puts "$relx $rely translate"
+	puts "$relw $relh scale"
+	puts $ch "gsave"
+#	puts $ch "$relw $relh scale"
+	puts $ch "$relx $rely translate"
+	
+#	set bb {fail}
+#	regexp {%%BoundingBox:\s\d+\s\d+\s\d+\s\d+} $var($cc,ps) bb
+#	puts $bb
 
 	# begin
 	set bb [string first {%%EndSetup} $var($cc,ps)]
@@ -144,6 +155,8 @@ proc PlotPostScript {varname} {
 
 	# body
 	puts $ch [string range $var($cc,ps) $bb $ee]
+
+	puts $ch "grestore"
     }
 
     # trailer
