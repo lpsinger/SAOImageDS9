@@ -9,10 +9,9 @@ proc PlotPSPrint {varname} {
     global $varname
 
     if {[PlotPrintDialog]} {
-	PlotPostScript $varname
-#	if {[catch {PlotPostScript $varname} printError]} {
-#	    Error "[msgcat::mc {An error has occurred while printing}] $printError"
-#	}
+	if {[catch {PlotPostScript $varname} printError]} {
+	    Error "[msgcat::mc {An error has occurred while printing}] $printError"
+	}
     }
 }
 
@@ -137,8 +136,6 @@ proc PlotPostScript {varname} {
     foreach cc $var(graphs) {
 	set xx [expr $width*$var($cc,tx)]
 	set yy [expr $height*$var($cc,ty)]
-	puts "$var($cc,tx) $var($cc,ty)"
-	puts "$xx $yy translate"
 	puts $ch "gsave"
 	puts $ch "$xx $yy translate"
 	
