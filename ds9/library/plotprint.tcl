@@ -240,17 +240,12 @@ proc PlotPostScriptMulti {varname} {
     set bb [expr $bb+9]
     puts $ch [string range $prolog 0 $bb]
 
-    puts ""
     foreach cc $var(graphs) {
 	set xx [expr $width*$var($cc,tx)]
 	set yy [expr $height*$var($cc,ty)]
 	puts $ch "gsave"
 	puts $ch "$xx $yy translate"
 	
-#	set bb {fail}
-#	regexp {%%BoundingBox:\s\d+\s\d+\s\d+\s\d+} $var($cc,ps) bb
-#	puts $bb
-
 	# begin
 	set bb [string first {%%EndSetup} $var($cc,ps)]
 	set bb [expr $bb+9]

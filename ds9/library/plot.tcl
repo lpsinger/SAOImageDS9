@@ -1103,14 +1103,20 @@ proc PlotBackup {ch dir} {
 		PlotCurrentGraph $varname
 		puts $ch "PlotAddGraph $varname $var($cc,type)"
 
+		# in case of no data
+		PlotSaveConfigFile $varname "$fdir/graph${cc}.plt"
+		puts $ch "PlotLoadConfigFile $varname $fdir/graph${cc}.plt"
+
+		# for each dataset
 		foreach nn $var($cc,dss) {
 		    set var(graph,ds,current) $nn
 		    PlotCurrentDataSet $varname
 
 		    PlotSaveDataFile $varname "$fdir/graph${cc}ds${nn}.dat"
+		    puts $ch "PlotLoadDataFile $varname $fdir/graph${cc}ds${nn}.dat $var($cc,$nn,dim)"
+
 		    PlotSaveConfigFile $varname "$fdir/graph${cc}ds${nn}.plt"
 
-		    puts $ch "PlotLoadDataFile $varname $fdir/graph${cc}ds${nn}.dat $var($cc,$nn,dim)"
 		    puts $ch "PlotLoadConfigFile $varname $fdir/graph${cc}ds${nn}.plt"
 		}
 	    }
