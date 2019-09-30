@@ -833,8 +833,7 @@ proc PlotUpdateCanvas {varname} {
 		$var($cc,graph) configure \
 		    -topmargin 0 -bottommargin 0 \
 		    -leftmargin 0 -rightmargin 0 \
-		    -borderwidth 2 \
-		    -plotrelief flat -plotborderwidth 2
+		    -borderwidth 2 
 
 		$var($cc,graph) xaxis configure -showticks 1 -linewidth 1
 		$var($cc,graph) yaxis configure -showticks 1 -linewidth 1
@@ -848,8 +847,7 @@ proc PlotUpdateCanvas {varname} {
 
 		$var($cc,graph) configure \
 		    -leftmargin $left -rightmargin $right \
-		    -borderwidth 0 \
-		    -plotrelief solid -plotborderwidth 1
+		    -borderwidth 2
 
 		if {$cc == $first} {
 		    $var($cc,graph) configure -topmargin 0 -bottommargin 1
