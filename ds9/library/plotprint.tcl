@@ -47,13 +47,6 @@ proc PlotPostScript {varname} {
 	aqua {set scaling 1.4}
     }
 
-    # Size
-    set width [winfo width $var(top)]
-    set height [winfo height $var(top)]
-    set ww [expr $width*$ps(scale)/100./$scaling]
-    set hh [expr $height*$ps(scale)/100./$scaling]
-    append options " -width $ww -height $hh"
-
     # Page size
     switch -- $ps(size) {
 	letter {append options " -paperwidth 8.5i -paperheight 11.i"}
@@ -83,6 +76,13 @@ proc PlotPostScript {varname} {
 	landscape {append options " -landscape true"}
     }
 
+    # Prolog
+
+    set width [expr [winfo width $var(top)]*$ps(scale)/100./$scaling]
+    set height [expr [winfo height $var(top)]*$ps(scale)/100./$scaling]
+    set prolog [eval $var([lindex $var(graphs) 0],graph) postscript output \
+		    "$options -width $width -height $height"]
+
     #
     # For each graph
     #
@@ -97,7 +97,12 @@ proc PlotPostScript {varname} {
 
 	$var($cc,graph) legend configure -font "$var(legend,font,family) $var(legend,font,size) $var(legend,font,weight) $var(legend,font,slant)" -titlefont "$var(legend,title,family) $var(legend,title,size) $var(legend,title,weight) $var(legend,title,slant)"
 
-	set var($cc,ps) [eval $var($cc,graph) postscript output $options]
+	# Size
+	set ww [expr [winfo width $var($cc,graph)]*$ps(scale)/100./$scaling]
+	set hh [expr [winfo height $var($cc,graph)]*$ps(scale)/100./$scaling]
+
+	set var($cc,ps) [eval $var($cc,graph) postscript output \
+			     "$options -width $ww -height $hh"]
 
 	# reset fonts
 	$var($cc,graph) configure \
@@ -122,23 +127,20 @@ proc PlotPostScript {varname} {
     } else {
 	set ch [open "| $ps(cmd)" w]
     }
-    set first [lindex $var(graphs) 0]
 
     # prolog
-    set bb [string first {%%EndSetup} $var($first,ps)]
+    set bb [string first {%%EndSetup} $prolog]
     set bb [expr $bb+9]
-    puts $ch [string range $var($first,ps) 0 $bb]
+    puts $ch [string range $prolog 0 $bb]
 
+    puts ""
     foreach cc $var(graphs) {
-	set relw $var($cc,relw)
-	set relh $var($cc,relh)
-	set relx [expr $width*$var($cc,relx)]
-	set rely [expr $height*$var($cc,rely)]
-	puts "$relx $rely translate"
-	puts "$relw $relh scale"
+	set xx [expr $width*$var($cc,tx)]
+	set yy [expr $height*$var($cc,ty)]
+	puts "$var($cc,tx) $var($cc,ty)"
+	puts "$xx $yy translate"
 	puts $ch "gsave"
-#	puts $ch "$relw $relh scale"
-	puts $ch "$relx $rely translate"
+	puts $ch "$xx $yy translate"
 	
 #	set bb {fail}
 #	regexp {%%BoundingBox:\s\d+\s\d+\s\d+\s\d+} $var($cc,ps) bb
@@ -160,8 +162,8 @@ proc PlotPostScript {varname} {
     }
 
     # trailer
-    set ee [string last {showpage} $var($first,ps)]
-    puts $ch [string range $var($first,ps) $ee end]
+    set ee [string last {showpage} $prolog]
+    puts $ch [string range $prolog $ee end]
     
     close $ch
 

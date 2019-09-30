@@ -102,10 +102,8 @@ proc PlotInitGraph {varname} {
 
     set var(graph) $var(top).gr$cc
 
-    set var(graph,relw) 1
-    set var(graph,relh) 1
-    set var(graph,relx) 0
-    set var(graph,rely) 0
+    set var(graph,tx) 0
+    set var(graph,ty) 0
 
     set var(graph,type) {}
     set var(graph,proc,updateelement) {}
@@ -182,10 +180,8 @@ proc PlotSaveState {varname} {
 
     set var($cc,graph) $var(graph)
 
-    set var($cc,relw) $var(graph,relw) 
-    set var($cc,relh) $var(graph,relh) 
-    set var($cc,relx) $var(graph,relx) 
-    set var($cc,rely) $var(graph,rely) 
+    set var($cc,tx) $var(graph,tx) 
+    set var($cc,ty) $var(graph,ty) 
 
     set var($cc,type) $var(graph,type)
     set var($cc,proc,updateelement) $var(graph,proc,updateelement)
@@ -262,10 +258,8 @@ proc PlotRestoreState {varname} {
 
     set var(graph) $var($cc,graph)
 
-    set var(graph,relw) $var($cc,relw) 
-    set var(graph,relh) $var($cc,relh) 
-    set var(graph,relx) $var($cc,relx) 
-    set var(graph,rely) $var($cc,rely) 
+    set var(graph,tx) $var($cc,tx) 
+    set var(graph,ty) $var($cc,ty) 
 
     set var(graph,type) $var($cc,type)
     set var(graph,proc,updateelement) $var($cc,proc,updateelement)

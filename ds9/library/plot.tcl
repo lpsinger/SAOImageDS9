@@ -608,14 +608,12 @@ proc PlotLayoutCanvas {varname} {
 	    set xx 0
 	    set yy 0
 	    foreach cc $var(graphs) {
-		set var($cc,relw) $z1
-		set var($cc,relh) $z2
-		set var($cc,relx) [expr $xx*$z1]
-		set var($cc,rely) [expr $yy*$z2]
+		set var($cc,tx) [expr $xx*$z1]
+		set var($cc,ty) [expr $yy*$z2]
 
 		place $var($cc,graph) -in $var(top) \
-		    -relwidth $var($cc,relw) -relheight $var($cc,relh) \
-		    -relx $var($cc,relx) -rely $var($cc,rely) \
+		    -relwidth $z1 -relheight $z2 \
+		    -relx [expr $xx*$z1] -rely [expr $yy*$z2] \
 		    -anchor nw
 
 		incr xx
@@ -629,14 +627,12 @@ proc PlotLayoutCanvas {varname} {
 	    set zz [expr 1./[llength $var(graphs)]]
 	    set ii 0
 	    foreach cc $var(graphs) {
-		set var($cc,relw) $zz
-		set var($cc,relh) 1
-		set var($cc,relx) [expr $ii*$zz]
-		set var($cc,rely) .5
+		set var($cc,tx) [expr $ii*$zz]
+		set var($cc,ty) 0
 
 		place $var($cc,graph) -in $var(top) \
-		    -relwidth $var($cc,relw) -relheight $var($cc,relh) \
-		    -relx $var($cc,relx) -rely $var($cc,rely) \
+		    -relwidth $zz -relheight 1 \
+		    -relx [expr $ii*$zz] -rely .5 \
 		    -anchor w
 		incr ii
 	    }
@@ -645,14 +641,12 @@ proc PlotLayoutCanvas {varname} {
 	    set zz [expr 1./[llength $var(graphs)]]
 	    set ii 0
 	    foreach cc $var(graphs) {
-		set var($cc,relw) 1
-		set var($cc,relh) $zz
-		set var($cc,relx) .5
-		set var($cc,rely) [expr $ii*$zz]
+		set var($cc,tx) 0
+		set var($cc,ty) [expr $ii*$zz]
 
 		place $var($cc,graph) -in $var(top) \
-		    -relwidth $var($cc,relw) -relheight $var($cc,relh) \
-		    -relx $var($cc,relx) -rely $var($cc,rely) \
+		    -relwidth 1 -relheight $zz \
+		    -relx .5 -rely [expr $ii*$zz] \
 		    -anchor n
 		incr ii
 	    }
@@ -671,23 +665,19 @@ proc PlotLayoutCanvas {varname} {
 	    set ii 0
 	    foreach cc $var(graphs) {
 		if {$ii == 0} {
-		    set var($cc,relw) 1
-		    set var($cc,relh) $z1
-		    set var($cc,relx) 1
-		    set var($cc,rely) 1
+		    set var($cc,tx) 0
+		    set var($cc,ty) 0
 
 		    place $var($cc,graph) -in $var(top) \
-			-relwidth $var($cc,relw) -relheight $var($cc,relh) \
+			-relwidth 1 -relheight $z1 \
 			-x 0 -y 0
 		} else {
-		    set var($cc,relw) 1
-		    set var($cc,relh) $z2
-		    set var($cc,relx) .5
-		    set var($cc,rely) [expr $ii*$z2 + $z1]
+		    set var($cc,tx) 0
+		    set var($cc,ty) [expr ($ii-1)*$z2 + $z1]
 
 		    place $var($cc,graph) -in $var(top) \
-			-relwidth $var($cc,relw) -relheight $var($cc,relh) \
-			-relx $var($cc,relx) -rely $var($cc,rely) \
+			-relwidth 1 -relheight $z2 \
+			-relx .5 -rely [expr $ii*$z2 + $z1] \
 			-anchor s
 		}
 		incr ii
