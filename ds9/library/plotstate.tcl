@@ -180,8 +180,8 @@ proc PlotSaveState {varname} {
 
     set var($cc,graph) $var(graph)
 
-    set var($cc,tx) $var(graph,tx) 
-    set var($cc,ty) $var(graph,ty) 
+    set var($cc,tx) $var(graph,tx)
+    set var($cc,ty) $var(graph,ty)
 
     set var($cc,type) $var(graph,type)
     set var($cc,proc,updateelement) $var(graph,proc,updateelement)
@@ -258,8 +258,8 @@ proc PlotRestoreState {varname} {
 
     set var(graph) $var($cc,graph)
 
-    set var(graph,tx) $var($cc,tx) 
-    set var(graph,ty) $var($cc,ty) 
+    set var(graph,tx) $var($cc,tx)
+    set var(graph,ty) $var($cc,ty)
 
     set var(graph,type) $var($cc,type)
     set var(graph,proc,updateelement) $var($cc,proc,updateelement)

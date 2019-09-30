@@ -245,7 +245,7 @@ proc PlotPostScriptMulti {varname} {
 	set yy [expr $height*$var($cc,ty)]
 	puts $ch "gsave"
 	puts $ch "$xx $yy translate"
-	
+
 	# begin
 	set bb [string first {%%EndSetup} $var($cc,ps)]
 	set bb [expr $bb+9]
@@ -264,7 +264,7 @@ proc PlotPostScriptMulti {varname} {
     # trailer
     set ee [string last {showpage} $prolog]
     puts $ch [string range $prolog $ee end]
-    
+
     close $ch
 
     foreach cc $var(graphs) {

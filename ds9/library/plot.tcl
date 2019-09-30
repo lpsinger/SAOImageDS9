@@ -686,7 +686,7 @@ proc PlotLayoutCanvas {varname} {
     }
 
     PlotRestoreState $varname
-    
+
     # needed so layout can be properly realized
     update idletasks
 }
@@ -833,7 +833,7 @@ proc PlotUpdateCanvas {varname} {
 		$var($cc,graph) configure \
 		    -topmargin 0 -bottommargin 0 \
 		    -leftmargin 0 -rightmargin 0 \
-		    -borderwidth 2 
+		    -borderwidth 2
 
 		$var($cc,graph) xaxis configure -showticks 1 -linewidth 1
 		$var($cc,graph) yaxis configure -showticks 1 -linewidth 1
