@@ -1384,6 +1384,9 @@ proc KeyFrame {which K A xx yy} {
 		h {$which warp -1 0}
 		Right -
 		l {$which warp 1 0}
+
+		z {Zoom 2 2}
+		Z {Zoom .5 .5}
 	    }
 	}
 	pointer -
@@ -1416,6 +1419,9 @@ proc KeyFrame {which K A xx yy} {
 		b {$which marker property source 0 $xx $yy}
 		g {GroupCreate}
 		G {GroupCreateSilent}
+
+		z {Zoom 2 2}
+		Z {Zoom .5 .5}
 	    }    
 	}
 	catalog {
@@ -1462,6 +1468,9 @@ proc KeyFrame {which K A xx yy} {
 		h {CrosshairArrowKey $which -1 0}
 		Right -
 		l {CrosshairArrowKey $which 1 0}
+
+		z {Zoom 2 2}
+		Z {Zoom .5 .5}
 	    }
 	}
 	pan {
@@ -1474,13 +1483,20 @@ proc KeyFrame {which K A xx yy} {
 		h {PanCanvas 1 0}
 		Right -
 		l {PanCanvas -1 0}
+
+		z {Zoom 2 2}
+		Z {Zoom .5 .5}
 	    }
-	    UpdateMagnifier $which $xx $yy
+	}
+	zoom -
+	rotate {
+	    switch -- $K {
+		z {Zoom 2 2}
+		Z {Zoom .5 .5}
+	    }
 	}
 	iexam {IExamKey $which $K $xx $yy}
 	colorbar -
-	zoom -
-	rotate -
 	crop -
 	examine {}
 	3d {
@@ -1494,8 +1510,14 @@ proc KeyFrame {which K A xx yy} {
 		Right -
 		l {3DArrowKey $which 1 0}
 	    }
+
+	    z {Zoom 2 2}
+	    Z {Zoom .5 .5}
 	}
     }
+
+    # since most modes do zoom
+    UpdateMagnifier $which $xx $yy
 
     UpdateEditMenu
 }
